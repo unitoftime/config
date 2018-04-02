@@ -1,27 +1,21 @@
 ;; ----------------- Graphical ----------------------
 
 ;; turn off the tool bar
-(tool-bar-mode -1)
 
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
+(tool-bar-mode -1)
+;; turn off help screen
+(setq inhibit-startup-screen t)
 ;;turn on line numbers
 (global-linum-mode t)
 
 ;;indents as 2 spaces
 (setq default-tab-width 2)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (misterioso)))
- '(inhibit-startup-screen t)
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(whitespace-trailing ((t (:foreground "PaleVioletRed1" :strike-through t)))))
 
 ;; whitespace-mode stuff
 (require 'whitespace)
@@ -82,3 +76,19 @@
       (concat dired-omit-files "\\|^\\..+$"))
 
 (put 'erase-buffer 'disabled nil)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(custom-enabled-themes (quote (misterioso)))
+ '(package-selected-packages (quote (go-mode)))
+ '(tool-bar-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:family "Noto Mono" :foundry "GOOG" :slant normal :weight normal :height 113 :width normal)))))
