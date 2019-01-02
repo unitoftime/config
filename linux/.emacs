@@ -14,24 +14,24 @@
 ;;turn on line numbers
 (global-linum-mode t)
 
-;;indents as 2 spaces
-(setq default-tab-width 2)
-
 ;; whitespace-mode stuff
 (require 'whitespace)
-;(setq whitespace-style '(face trailing tabs lines-tail))
-(setq whitespace-style '(face lines-tail))
+(setq whitespace-line-column 100)
+(setq whitespace-style '(face trailing tabs lines-tail))
+;;(setq whitespace-style '(face lines-tail))
 (setq whitespace-line "font-lock-warning-face")
 (global-whitespace-mode t)
 
 ;; ------------------ Bindings ----------------------
 
 ;; re-bind buffer-list to buffer-menu
-(global-set-key "\C-x\C-b" 'ibuffer)
+;(global-set-key "\C-x\C-b" 'ibuffer)
 
 ;; make it easy to change between buffers
 (global-set-key "\M-[" 'previous-multiframe-window)
 (global-set-key "\M-]" 'next-multiframe-window)
+
+(define-key global-map (kbd "C-j") 'ace-jump-mode)
 
 ;; ----------------- Environment --------------------
 ;; load emacs 24's package system. Add MELPA repository.
@@ -47,11 +47,56 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 
+;; Org mode
+(setq org-log-done 'time)
+
 ;; display a list of recent files
 (require 'recentf)
 (recentf-mode 1)
 (setq recentf-max-menu-items 16)
-(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+;(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+
+;; Helm Mode Bindings
+(helm-mode 1)
+(global-set-key "\C-x\ \C-r" 'helm-recentf)
+;(global-set-key "\C-x\C-b" 'helm-locate)
+(global-set-key "\C-x\C-b" 'helm-mini)
+
+;; Magit bindings
+(global-set-key "\C-x\ g" 'magit-status)
+
+;; Dumb Jump Bindings
+(global-set-key "\M-." 'dumb-jump-go)
+(global-set-key "\M-," 'dumb-jump-back)
+
+;; Recompile binding
+(global-set-key "\C-c\ m" 'recompile)
+(setq compilation-auto-jump-to-first-error nil)
+(setq compilation-scroll-output 1) ;;Follow-mode
+
+;; Buffer timer
+(defun work-timer ()
+  (interactive)
+  (add-to-list 'load-path "~/.emacs.d/buffer-timer/")
+  (load "buffer-timer.el")
+  (require 'buffer-timer)
+
+  (setq buffer-timer-regexp-master-list
+        '(
+          ("idle" .
+           (("generic" .      "^\\*idle\\*")
+            ("generic2" .     "^\\*idle-2\\*")
+            ("minibuf" .      "^ \\*Minibuf-.*")))
+          ("work" .
+           (("FallenOrb" .
+             (("code" .       "/src/gitlab.com/fallen/.*\\(go\\)$")
+              ("generic" .    "/src/gitlab.com/fallen/")))
+            )
+           )))
+  )
+
+;; Aliases
+(defalias 'rs 'replace-string)
 
 ;; default to use only spaces
 (setq-default indent-tabs-mode nil)
@@ -83,12 +128,26 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
- '(custom-enabled-themes (quote (misterioso)))
- '(package-selected-packages (quote (go-mode)))
+ '(custom-enabled-themes (quote (tango-dark)))
+ '(package-selected-packages
+   (quote
+    (ace-jump-mode dumb-jump helm haskell-mode magit go-mode)))
  '(tool-bar-mode nil))
+
+;;indents as 2 spaces
+(setq default-tab-width 2)
+(add-hook 'go-mode-hook
+          (lambda ()
+            (setq indent-tabs-mode 1)
+            (setq tab-width 2)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Noto Mono" :foundry "GOOG" :slant normal :weight normal :height 113 :width normal)))))
+ )
+
+(add-to-list 'same-window-buffer-names "*compilation*")
+
+(add-to-list 'auto-mode-alist '("\\.cppm\\'" . c++-mode))
+
