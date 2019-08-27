@@ -8,6 +8,19 @@
 ;; You may delete these explanatory comments.
 (package-initialize)
 
+;; ----------------- Environment --------------------
+;; load emacs 24's package system. Add MELPA repository.
+;(setq package-enable-at-startup nil)
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (add-to-list
+   'package-archives
+   ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
+   '("melpa" . "http://melpa.milkbox.net/packages/")
+   t))
+
+(setq ring-bell-function 'ignore)
+
 (tool-bar-mode -1)
 ;; turn off help screen
 (setq inhibit-startup-screen t)
@@ -33,16 +46,6 @@
 
 (define-key global-map (kbd "C-j") 'ace-jump-mode)
 
-;; ----------------- Environment --------------------
-;; load emacs 24's package system. Add MELPA repository.
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (add-to-list
-   'package-archives
-   ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-   '("melpa" . "http://melpa.milkbox.net/packages/")
-   t))
-
 ;;Disable backups and autosaves
 (setq make-backup-files nil)
 (setq auto-save-default nil)
@@ -56,8 +59,26 @@
 (setq recentf-max-menu-items 16)
 ;(global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
+;; God Mode
+(require 'god-mode)
+(global-set-key (kbd "M-i") 'god-mode-all)
+(define-key god-local-mode-map (kbd "i") 'god-mode-all)
+
+; Exempt buffers
+(setq god-exempt-major-modes nil)
+(setq god-exempt-predicates nil)
+
+; Cursor change
+(defun my-update-cursor ()
+  (setq cursor-type (if (or god-local-mode buffer-read-only)
+                        'hollow
+                      'box)))
+
+(add-hook 'god-mode-enabled-hook 'my-update-cursor)
+(add-hook 'god-mode-disabled-hook 'my-update-cursor)
+
 ;; Helm Mode Bindings
-(helm-mode 1)
+;(helm-mode 1)
 (global-set-key "\C-x\ \C-r" 'helm-recentf)
 ;(global-set-key "\C-x\C-b" 'helm-locate)
 (global-set-key "\C-x\C-b" 'helm-mini)
