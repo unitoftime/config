@@ -1,3 +1,5 @@
+;; .emacs -> (load "~/git/config/linux/init.el")
+;;
 ;; ----------------- Graphical ----------------------
 
 ;; turn off the tool bar
@@ -7,19 +9,6 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 (package-initialize)
-
-;; ----------------- Environment --------------------
-;; load emacs 24's package system. Add MELPA repository.
-;(setq package-enable-at-startup nil)
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (add-to-list
-   'package-archives
-   ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-   '("melpa" . "http://melpa.milkbox.net/packages/")
-   t))
-
-(setq ring-bell-function 'ignore)
 
 (tool-bar-mode -1)
 ;; turn off help screen
@@ -45,6 +34,107 @@
 (global-set-key "\M-]" 'next-multiframe-window)
 
 (define-key global-map (kbd "C-j") 'ace-jump-mode)
+(define-key global-map (kbd "C-c C-c") 'comment-region)
+
+;;------------------------------------------------------------------------------
+;; --- Experimental ergonomics ---
+;;------------------------------------------------------------------------------
+
+;; Rebind C-u to do C-x
+(keyboard-translate ?\C-u ?\C-x)
+
+;; Kind of god mode but just for browsing
+;; (defhydra hydra-browse (:color blue)
+;;   "Browse"
+;;   ("n" next-line)
+;;   ("p" previous-line)
+;;   ("f" forward-char)
+;;   ("b" backward-char)
+
+;;   ("v" scroll-up-command)
+;;   ("M-v" scroll-down-command)
+;;   ("l" recenter-top-bottom)
+
+;;   ("M-[" previous-multiframe-window)
+;;   ("M-]" next-multiframe-window)
+;;   ("q" nil "quit")
+;;   ("i" nil "quit")
+;;   )
+;; (global-set-key (kbd "C-c r") 'hydra-browse/body)
+
+(require 'god-mode)
+;(global-set-key (kbd "<escape>") 'god-mode-all)
+;; Was tab-to-tab-stop
+(global-set-key (kbd "M-i") 'god-mode-all)
+
+;(require 'color)
+;; Indicators for god-mode
+(require 'hl-line)
+;(defadvice hl-line-mode (after
+;                         dino-advise-hl-line-mode
+;                         activate compile)
+;  (set-face-background hl-line-face "gray13"))
+(set-face-background 'hl-line "dim gray")
+;(set-face-background hl-line-face "black")
+(set-face-foreground 'highlight nil)
+
+(with-eval-after-load 'god-mode
+  (define-key god-local-mode-map (kbd ".") 'repeat)
+  (define-key god-local-mode-map (kbd "i") 'god-mode-all)
+  (global-set-key (kbd "C-x C-1") 'delete-other-windows)
+  (global-set-key (kbd "C-x C-2") 'split-window-below)
+  (global-set-key (kbd "C-x C-3") 'split-window-right)
+  (global-set-key (kbd "C-x C-0") 'delete-window)
+  (global-set-key (kbd "C-c C-m") 'recompile)
+;  (global-set-key "\C-x\ g" 'magit-status)
+  ;; (global-set-key (kbd "C-x g") 'magit-status)
+
+;  (add-to-list 'god-exempt-major-modes 'dired-mode)
+
+  ;; Update the cursor based on the god mode state
+  (defun god-mode-update-cursor ()
+;    (setq cursor-type
+;          (if (or god-local-mode buffer-read-only) 'hollow 'box)))
+    (if (or god-local-mode buffer-read-only) (global-hl-line-mode 1) (global-hl-line-mode 0)))
+
+  (add-hook 'god-mode-enabled-hook 'god-mode-update-cursor)
+  (add-hook 'god-mode-disabled-hook 'god-mode-update-cursor))
+
+;; turn bar red in god mode - grey otherwise
+;; (defun me//god-mode-indicator ()
+;;   (cond (god-local-mode
+;;          (progn
+;;            (set-face-background 'mode-line "red4")
+;;            (set-face-foreground 'mode-line "gray")
+;;            (set-face-background 'mode-line-inactive "gray30")
+;;            (set-face-foreground 'mode-line-inactive "red")))
+;;         (t
+;;          (progn
+;;            (set-face-background 'mode-line-inactive "gray30")
+;;            (set-face-foreground 'mode-line-inactive "gray80")
+;;            (set-face-background 'mode-line "gray75")
+;;            (set-face-foreground 'mode-line "black")))))
+
+;; (add-hook 'god-mode-enabled-hook #'me//god-mode-indicator)
+;; (add-hook 'god-mode-disabled-hook #'me//god-mode-indicator)
+
+
+(require 'keyfreq)
+(keyfreq-mode 1)
+(keyfreq-autosave-mode 1)
+
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+
+;; ----------------- Environment --------------------
+;; load emacs 24's package system. Add MELPA repository.
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (add-to-list
+   'package-archives
+   ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
+   '("melpa" . "http://melpa.milkbox.net/packages/")
+   t))
 
 ;;Disable backups and autosaves
 (setq make-backup-files nil)
@@ -59,26 +149,8 @@
 (setq recentf-max-menu-items 16)
 ;(global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
-;; God Mode
-(require 'god-mode)
-(global-set-key (kbd "M-i") 'god-mode-all)
-(define-key god-local-mode-map (kbd "i") 'god-mode-all)
-
-; Exempt buffers
-(setq god-exempt-major-modes nil)
-(setq god-exempt-predicates nil)
-
-; Cursor change
-(defun my-update-cursor ()
-  (setq cursor-type (if (or god-local-mode buffer-read-only)
-                        'hollow
-                      'box)))
-
-(add-hook 'god-mode-enabled-hook 'my-update-cursor)
-(add-hook 'god-mode-disabled-hook 'my-update-cursor)
-
 ;; Helm Mode Bindings
-;(helm-mode 1)
+(helm-mode 1)
 (global-set-key "\C-x\ \C-r" 'helm-recentf)
 ;(global-set-key "\C-x\C-b" 'helm-locate)
 (global-set-key "\C-x\C-b" 'helm-mini)
@@ -94,27 +166,6 @@
 (global-set-key "\C-c\ m" 'recompile)
 (setq compilation-auto-jump-to-first-error nil)
 (setq compilation-scroll-output 1) ;;Follow-mode
-
-;; Buffer timer
-(defun work-timer ()
-  (interactive)
-  (add-to-list 'load-path "~/.emacs.d/buffer-timer/")
-  (load "buffer-timer.el")
-  (require 'buffer-timer)
-
-  (setq buffer-timer-regexp-master-list
-        '(
-          ("idle" .
-           (("generic" .      "^\\*idle\\*")
-            ("generic2" .     "^\\*idle-2\\*")
-            ("minibuf" .      "^ \\*Minibuf-.*")))
-          ("work" .
-           (("FallenOrb" .
-             (("code" .       "/src/gitlab.com/fallen/.*\\(go\\)$")
-              ("generic" .    "/src/gitlab.com/fallen/")))
-            )
-           )))
-  )
 
 ;; Aliases
 (defalias 'rs 'replace-string)
@@ -152,7 +203,7 @@
  '(custom-enabled-themes (quote (tango-dark)))
  '(package-selected-packages
    (quote
-    (ace-jump-mode dumb-jump helm haskell-mode magit go-mode)))
+    (god-mode keyfreq hydra ace-jump-mode dumb-jump helm haskell-mode magit go-mode)))
  '(tool-bar-mode nil))
 
 ;;indents as 2 spaces
@@ -172,3 +223,5 @@
 
 (add-to-list 'auto-mode-alist '("\\.cppm\\'" . c++-mode))
 
+;; Remove foreground from highlights, so that highlight bars show syntax highlighting
+(set-face-foreground 'highlight nil)
