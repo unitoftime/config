@@ -41,7 +41,7 @@
 ;;------------------------------------------------------------------------------
 
 ;; Rebind C-u to do C-x
-(keyboard-translate ?\C-u ?\C-x)
+;; (keyboard-translate ?\C-u ?\C-x)
 
 ;; Kind of god mode but just for browsing
 ;; (defhydra hydra-browse (:color blue)
@@ -85,6 +85,7 @@
   (global-set-key (kbd "C-x C-2") 'split-window-below)
   (global-set-key (kbd "C-x C-3") 'split-window-right)
   (global-set-key (kbd "C-x C-0") 'delete-window)
+  (global-set-key (kbd "C-c C-n") 'compile)
   (global-set-key (kbd "C-c C-m") 'recompile)
 ;  (global-set-key "\C-x\ g" 'magit-status)
   ;; (global-set-key (kbd "C-x g") 'magit-status)
@@ -163,6 +164,7 @@
 (global-set-key "\M-," 'dumb-jump-back)
 
 ;; Recompile binding
+(global-set-key "\C-c\ n" 'compile)
 (global-set-key "\C-c\ m" 'recompile)
 (setq compilation-auto-jump-to-first-error nil)
 (setq compilation-scroll-output 1) ;;Follow-mode
