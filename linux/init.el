@@ -1,16 +1,11 @@
 ;; .emacs -> (load "~/git/config/linux/init.el")
 ;;
-;; ----------------- Packages  ----------------------
-;; load emacs 24's package system. Add MELPA repository.
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (add-to-list
-   'package-archives
-   ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-   '("melpa" . "http://melpa.milkbox.net/packages/")
-   t))
-
 ;; ----------------- Graphical ----------------------
+
+(require 'exec-path-from-shell)
+(exec-path-from-shell-copy-env "SSH_AGENT_PID")
+(exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
+(keychain-refresh-environment)
 
 ;; turn off the tool bar
 
@@ -28,13 +23,18 @@
 
 ;; whitespace-mode stuff
 (require 'whitespace)
-(setq whitespace-line-column 100)
+(setq whitespace-line-column 1000)
 (setq whitespace-style '(face trailing tabs lines-tail))
 ;;(setq whitespace-style '(face lines-tail))
 (setq whitespace-line "font-lock-warning-face")
 (global-whitespace-mode t)
 
 ;; ------------------ Bindings ----------------------
+
+;; Setup Path - https://www.emacswiki.org/emacs/ExecPath
+(setenv "PATH" (concat (getenv "PATH") ":/home/jacob/go/bin/"))
+(setq exec-path (append exec-path '("/home/jacob/go/bin/")))
+
 
 ;; re-bind buffer-list to buffer-menu
 ;(global-set-key "\C-x\C-b" 'ibuffer)
@@ -45,6 +45,10 @@
 
 (define-key global-map (kbd "C-j") 'ace-jump-mode)
 (define-key global-map (kbd "C-c C-c") 'comment-region)
+
+(default-text-scale-mode)
+(define-key global-map (kbd "C-c ]") (lambda () (interactive) (default-text-scale-increment 40)))
+(define-key global-map (kbd "C-c [") (lambda () (interactive) (default-text-scale-reset)))
 
 ;;------------------------------------------------------------------------------
 ;; --- Experimental ergonomics ---
@@ -138,6 +142,20 @@
 ;;------------------------------------------------------------------------------
 
 ;; ----------------- Environment --------------------
+;; load emacs 24's package system. Add MELPA repository.
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (add-to-list
+   'package-archives
+   '("melpa" . "https://melpa.org/packages/")
+   ;'("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
+   ;'("melpa" . "http://melpa.milkbox.net/packages/")
+   t))
+
+;; svelte files to use web-mode
+(add-to-list 'auto-mode-alist '("\\.svelte\\'" . web-mode))
+(setq web-mode-enable-current-element-highlight nil)
+
 ;;Disable backups and autosaves
 (setq make-backup-files nil)
 (setq auto-save-default nil)
@@ -148,20 +166,22 @@
 ;; display a list of recent files
 (require 'recentf)
 (recentf-mode 1)
-(setq recentf-max-menu-items 16)
-;(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+(setq recentf-max-menu-items 32)
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+;(global-set-key "\C-x\ \C-j" 'recentf-open-files)
 
 ;; Helm Mode Bindings
 (helm-mode 1)
 (global-set-key "\C-x\ \C-r" 'helm-recentf)
 ;(global-set-key "\C-x\C-b" 'helm-locate)
-(global-set-key "\C-x\C-b" 'helm-mini)
+;(global-set-key "\C-x\C-b" 'helm-mini)
+(global-set-key "\C-x\C-j" 'helm-mini)
 
 ;; Magit bindings
 (global-set-key "\C-x\ g" 'magit-status)
 
 ;; Dumb Jump Bindings
-(global-set-key "\M-." 'dumb-jump-go)
+(global-set-key "\M-." 'godef-jump)
 (global-set-key "\M-," 'dumb-jump-back)
 
 ;; Recompile binding
@@ -209,6 +229,11 @@
     (god-mode keyfreq hydra ace-jump-mode dumb-jump helm haskell-mode magit go-mode)))
  '(tool-bar-mode nil))
 
+;; (setq gofmt-command "goimports")
+;; ;(add-to-list 'load-path "/home/you/somewhere/emacs/")
+;; (require 'go-mode-load)
+;; (add-hook 'before-save-hook 'gofmt-before-save)
+
 ;;indents as 2 spaces
 (setq default-tab-width 2)
 (add-hook 'go-mode-hook
@@ -225,6 +250,14 @@
 (add-to-list 'same-window-buffer-names "*compilation*")
 
 (add-to-list 'auto-mode-alist '("\\.cppm\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.tgo\\'" . go-mode))
 
 ;; Remove foreground from highlights, so that highlight bars show syntax highlighting
 (set-face-foreground 'highlight nil)
+
+;; Insert Date
+(defun blog-date () (interactive)
+       (insert (shell-command-to-string "echo -n $(date -u +%Y-%m-%dT%H:%M:%S%z)")))
+
+
+(global-set-key "\C-x\C-j" 'helm-mini)
